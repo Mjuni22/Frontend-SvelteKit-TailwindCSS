@@ -1,11 +1,5 @@
 {
 	"version": 2,
-	"builds": [
-		{
-			"src": "svelte.config.js",
-			"use": "@sveltejs/adapter-vercel"
-		}
-	],
 	"env": {
 		"NODE_VERSION": "20"
 	},
