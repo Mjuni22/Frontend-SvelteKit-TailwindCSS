@@ -1,6 +1,10 @@
 <script lang="ts">
+	import { page } from '$app/stores'; // Import 'goto' for redirection
+	import axios from 'axios';
+	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
+	// Initializing dataSensor with empty strings
 	let dataSensor = {
 		pm10: '',
 		pm25: '',
@@ -14,40 +18,44 @@
 		location: ''
 	};
 
-	let isSubmitting = false;
-	let buttonText = 'Update Data';
-	let id = '123'; // Ganti ini dengan ID dinamis (misalnya dari parameter URL)
-
-	// Fungsi untuk memuat data awal berdasarkan ID
-	const loadSensorData = async () => {
+	// Destructuring id from $page.params to get the dynamic URL parameter
+	const { id } = $page.params;
+	// Function to fetch the sensor data and update the form fields
+	onMount(async () => {
 		try {
-			const response = await fetch(`http://localhost:3000/api/sensor/${id}`);
-			if (!response.ok) {
-				throw new Error(`Error fetching data: ${response.status}`);
-			}
+			const response = await axios.get(`https://backend-elysiajs.up.railway.app/sensor/${id}`);
+			console.log('Fetched Data:', response.data);
 
-			// Isi dataSensor dengan data dari API
-			dataSensor = await response.json();
-			console.log('Loaded data:', dataSensor);
+			// Update the dataSensor object with the fetched data
+			dataSensor = {
+				pm10: response.data.pm10,
+				pm25: response.data.pm25,
+				so2: response.data.so2,
+				co: response.data.co,
+				o3: response.data.o3,
+				no2: response.data.no2,
+				max: response.data.max,
+				critical: response.data.critical,
+				category: response.data.category,
+				location: response.data.location
+			};
 		} catch (error) {
-			console.error('Error loading sensor data:', error);
+			console.error('Error fetching sensor data:', error);
 		}
-	};
-
-	// Muat data ketika komponen di-mount
-	onMount(() => {
-		loadSensorData();
 	});
 
-	// Fungsi untuk submit update data
+	let isSubmitting = false;
+	let buttonText = 'Update Data';
+
+	// Function to handle form submission
 	const handleSubmit = async (e: Event) => {
 		e.preventDefault();
 		isSubmitting = true;
 		buttonText = 'Submitting...';
 
 		try {
-			const response = await fetch(`http://localhost:3000/api/sensor/${id}`, {
-				method: 'PUT',
+			const response = await fetch(`http://localhost:3000/sensor/${id}`, {
+				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json'
 				},
@@ -60,6 +68,23 @@
 
 			const result = await response.json();
 			console.log('Data successfully updated:', result);
+
+			// Clear the form after successful submission
+			dataSensor = {
+				pm10: '',
+				pm25: '',
+				so2: '',
+				co: '',
+				o3: '',
+				no2: '',
+				max: '',
+				critical: '',
+				category: '',
+				location: ''
+			};
+
+			// Redirect to the dashboard after successful update
+			goto('/dashboard'); // Change this to the appropriate dashboard URL
 		} catch (error) {
 			console.error('Error updating data:', error);
 		} finally {
@@ -74,6 +99,7 @@
 >
 	<h1 class="mb-6 text-2xl font-bold">Update Sensor Data</h1>
 	<form class="space-y-6" on:submit|preventDefault={handleSubmit}>
+		<!-- Form Fields -->
 		<div>
 			<label class="mb-1 block text-sm font-medium" for="pm10">Particulate Matter (PM10)</label>
 			<input
@@ -99,7 +125,7 @@
 		</div>
 
 		<div>
-			<label class="mb-1 block text-sm font-medium" for="pm25">Sulfur Dioksida (SO2)</label>
+			<label class="mb-1 block text-sm font-medium" for="so2">Sulfur Dioksida (SO2)</label>
 			<input
 				id="so2"
 				type="number"
@@ -183,7 +209,7 @@
 		</div>
 
 		<div>
-			<label class="mb-1 block text-sm font-medium" for="location">Loacation</label>
+			<label class="mb-1 block text-sm font-medium" for="location">Location</label>
 			<input
 				id="location"
 				type="text"

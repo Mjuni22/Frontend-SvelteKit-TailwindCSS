@@ -1,60 +1,55 @@
 <script>
 	// @ts-nocheck
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	let menuItems = ['Dashboard', 'Reports', 'Settings'];
-	let isSidebarOpen = true;
-	let sensorData = [];
+	let isSidebarOpen = false;
 	let errorMessage = null;
+	let sensorData = [];
+	let loading = true;
 
-	// Fungsi toggle sidebar
 	function toggleSidebar() {
 		isSidebarOpen = !isSidebarOpen;
 	}
 
-	// Fetch data dari API
-	async function fetchData() {
+	onMount(async () => {
 		try {
-			const response = await fetch('http://localhost:3000/api/sensor');
-			const result = await response.json();
-
-			if (result.success) {
-				sensorData = result.data;
-			} else {
-				errorMessage = result.message;
-			}
-		} catch (error) {
-			errorMessage = 'Failed to fetch data. Please try again later.';
-		}
-	}
-
-	// Delete data dari API
-	async function deleteData(id) {
-		if (!confirm('Are you sure you want to delete this data?')) return;
-
-		try {
-			const response = await fetch(`https://example.com/api/sensor-data/${id}`, {
-				method: 'DELETE'
-			});
-
+			const response = await fetch('http://backend-elysiajs.up.railway.app/sensor/getAll');
+			const data = await response.json();
 			if (response.ok) {
-				sensorData = sensorData.filter((item) => item.id !== id); // Hapus item dari state
-				alert('Data deleted successfully');
+				sensorData = data;
+				loading = false;
 			} else {
-				alert('Failed to delete data');
+				errorMessage = data.message;
 			}
 		} catch (error) {
-			alert('An error occurred while deleting data');
+			console.error(error);
 		}
+	});
+
+	function deleteData(id) {
+		fetch(`https://backend-elysiajs.up.railway.app/sensor/${id}`, {
+			method: 'DELETE'
+		})
+			.then((response) => {
+				if (response.ok) {
+					sensorData = sensorData.filter((item) => item.id !== id);
+				} else {
+					console.error('Error deleting data:', response.statusText);
+				}
+			})
+			.catch((error) => {
+				console.error('Error deleting data:', error);
+			});
 	}
 
-	// Update data (dummy fungsi untuk demo, tambahkan logika API di sini)
 	function updateData(item) {
-		alert(`Open update form for: ${item.id}`);
-		// Tambahkan logika untuk menampilkan form atau modal update
+		goto(`/sensor/update/${item.id}`);
 	}
-
-	// Fetch data saat komponen di-mount
-	fetchData();
+	function goToCreatePage() {
+		goto('/sensor/create');
+	}
 </script>
 
 <div class="flex h-screen bg-gray-100">
@@ -91,6 +86,15 @@
 	<div class="flex-1 p-6">
 		<h1 class="text-2xl font-semibold text-gray-800">Welcome to the Dashboard!</h1>
 
+		<!-- Button to navigate to create sensor page -->
+		<button
+			type="button"
+			class="mx-auto mb-5 mt-5 rounded-md bg-blue-400 px-3 py-2 text-black"
+			on:click={goToCreatePage}
+		>
+			Create New Sensor Data
+		</button>
+
 		{#if errorMessage}
 			<p class="mt-4 text-red-500">{errorMessage}</p>
 		{:else if sensorData.length === 0}
@@ -112,7 +116,7 @@
 							Updated at: {new Date(item.updatedAt).toLocaleString()}
 						</p>
 
-						<!-- Tombol Aksi -->
+						<!-- Action Buttons (Delete, Update) -->
 						<div class="mt-4 flex gap-2">
 							<button
 								class="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"

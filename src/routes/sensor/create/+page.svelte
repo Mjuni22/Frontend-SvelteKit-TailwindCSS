@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	let dataSensor = {
 		pm10: '',
@@ -24,7 +23,7 @@
 		buttonText = 'Submitting...';
 
 		try {
-			const response = await fetch('http://localhost:3000/api/sensor', {
+			const response = await fetch('https://backend-elysiajs.up.railway.app/sensor/create', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -52,6 +51,7 @@
 				category: '',
 				location: ''
 			};
+			goto('/dashboard');
 		} catch (error) {
 			console.error('Error sending data:', error);
 		} finally {
