@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores'; // Import 'goto' for redirection
+	import { page } from '$app/stores';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
-	// Initializing dataSensor with empty strings
 	let dataSensor = {
 		pm10: '',
 		pm25: '',
@@ -18,15 +17,11 @@
 		location: ''
 	};
 
-	// Destructuring id from $page.params to get the dynamic URL parameter
 	const { id } = $page.params;
-	// Function to fetch the sensor data and update the form fields
+
 	onMount(async () => {
 		try {
 			const response = await axios.get(`https://backend-elysiajs.up.railway.app/sensor/${id}`);
-			console.log('Fetched Data:', response.data);
-
-			// Update the dataSensor object with the fetched data
 			dataSensor = {
 				pm10: response.data.pm10,
 				pm25: response.data.pm25,
@@ -68,8 +63,6 @@
 
 			const result = await response.json();
 			console.log('Data successfully updated:', result);
-
-			// Clear the form after successful submission
 			dataSensor = {
 				pm10: '',
 				pm25: '',
@@ -82,9 +75,7 @@
 				category: '',
 				location: ''
 			};
-
-			// Redirect to the dashboard after successful update
-			goto('/dashboard'); // Change this to the appropriate dashboard URL
+			goto('/dashboard');
 		} catch (error) {
 			console.error('Error updating data:', error);
 		} finally {
