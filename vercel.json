@@ -1,0 +1,27 @@
+{
+	"version": 2,
+	"builds": [
+		{
+			"src": "package.json",
+			"use": "@vercel/node"
+		},
+		{
+			"src": "svelte.config.js",
+			"use": "@sveltejs/adapter-vercel"
+		}
+	],
+	"env": {
+		"NODE_VERSION": "20"
+	},
+	"build": {
+		"env": {
+			"NODE_VERSION": "20"
+		}
+	},
+	"routes": [
+		{
+			"src": "/(.*)",
+			"dest": "/src/routes/dashboard"
+		}
+	]
+}
