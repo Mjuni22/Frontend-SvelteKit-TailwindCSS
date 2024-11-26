@@ -49,7 +49,7 @@
 		buttonText = 'Submitting...';
 
 		try {
-			const response = await fetch(`http://localhost:3000/sensor/${id}`, {
+			const response = await fetch(`https://backend-elysiajs.up.railway.app/sensor/${id}`, {
 				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json'
