@@ -15,7 +15,7 @@
 
 	onMount(async () => {
 		try {
-			const response = await fetch('http://backend-elysiajs.up.railway.app/sensor/getAll');
+			const response = await fetch('https://backend-elysiajs.up.railway.app/sensor/getAll');
 			const data = await response.json();
 			if (response.ok) {
 				sensorData = data;
